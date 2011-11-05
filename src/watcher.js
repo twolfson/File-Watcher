@@ -128,11 +128,10 @@ function FileWatcher() {
             // Get the text
             var resText = req.responseText,
                 origText = fileCache[url];
-
             // If the url has never been loaded before
             if( !origText ) {
               // Save the content to our cache
-              fileCache[url] = origText;
+              fileCache[url] = resText;
             } else {
             // Otherwise...
               // If the content has changed

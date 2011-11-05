@@ -1,5 +1,4 @@
 
-/app.js
-/node_modules
-/nodemonw.exe
-/monServer.cmd
+/testServer.cmd
+/runTests.cmd
+/JsTestDriver.jar
