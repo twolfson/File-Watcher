@@ -1,6 +1,16 @@
 // TODO: Test in IE6
-var FileWatcher = (function () {
-
+// AMD inspired by domready
+(function (name, definition) {
+  var defObj;
+  if (typeof define === 'function') {
+    defObj[name] = definition;
+    define(defObj);
+  } else if (typeof exports !== 'undefined') {
+    exports[name] = definition;
+  } else {
+    this[name] = definition;
+  }
+}('FileWatcher', (function () {
 /**
  * XHR generator function
  * Try to create each possible form of XMLHttpRequest and return one if it works
@@ -47,14 +57,15 @@ var XHR = (function () {
  */
 function FileWatcher() {
   // Default options
-  var delay = 1000,
-      watchFiles = [],
-      fileChangedFn = function () {
+  var _delay = 1000,
+      _fileChangedFn = function () {
         location.reload();
       },
+  // Instance privitized variables
+      watchFiles = [],
       fileCache = {},
       noop = function(){},
-      loopCallback = noop;
+      loopCallback;
 
   /**
    * FileWatcher object
@@ -67,7 +78,7 @@ function FileWatcher() {
      */
     'append': function (url) {
       // Concatenate to the current list of files
-      watchFiles.concat(url);
+      watchFiles.push.apply(watchFiles, [].concat(url));
       return this;
     },
     /**
@@ -88,26 +99,6 @@ function FileWatcher() {
       return this;
     },
     /**
-     * Start method for watcher to begin checking files
-     * @returns {this} Returns same object for fluent interface
-     */
-    'start': function () {
-      var that = this;
-      // Set up async loop
-      function asyncCallback() {
-        that.next(loopCallback);
-      }
-
-      // Set up privitized variable for stopping
-      loopCallback = function () {
-        setTimeout( asyncCallback, delay );
-      };
-
-      // Begin the loop
-      asyncCallback();
-      return this;
-    },
-    /**
      * Check if next file in queue has changed
      * @param {Function} callback (Error, Return Data) function the be run when the XHR is complete
      * @returns {this} Returns same object for fluent interface
@@ -115,8 +106,12 @@ function FileWatcher() {
     'next': function (callback) {
       // Create a new XHR
       var req = XHR(),
-      // By default, if there are no files in the queue, watch the current page
-          url = watchFiles.shift() || '/';
+          url = watchFiles.shift();
+
+      // If there is no 'next' item, return early
+      if( !url ) {
+        return this;
+      }
 
       // Set up the XHR as async
       req.open("GET", url, true);
@@ -143,7 +138,7 @@ function FileWatcher() {
               // If the content has changed
               if( origText !== resText ) {
                 // Call the main fileChangedFn and overwrite the cache
-                fileChangedFn(origText, resText);
+                _fileChangedFn(origText, resText);
                 fileCache[url] = resText;
               }
             }
@@ -160,14 +155,119 @@ function FileWatcher() {
       // Send the request off with no data
       req.send(null);
       return this;
+    },
+    /**
+     * Start method for watcher to begin checking files (circular queue)
+     * @param {Number} [concurrentCount] Amount of items to check concurrently
+     * @returns {this} Returns same object for fluent interface
+     */
+    'start': function (concurrentCount) {
+      var that = this,
+          i;
+
+      // Set up async loop
+      function asyncCallback() {
+        that.next(loopCallback);
+      }
+
+      // Set up privitized variable for stopping
+      loopCallback = function () {
+        setTimeout( asyncCallback, _delay );
+      };
+
+      // Fallback concurrent count to 1
+      concurrentCount = concurrentCount || 1;
+      // Start the concurrent loops
+      for( i = 0; i < concurrentCount; i++ ) {
+        asyncCallback();
+      }
+      return this;
+    },
+    /**
+     * Stop method for watching files. DOES NOT CLEAR CACHE
+     * @returns {this} Returns same object for fluent interface
+     */
+    'stop': function () {
+      loopCallback = noop;
+      return this;
+    },
+    /**
+     * Setter method for delay in async loop
+     * @param {Number} delay New delay to set to
+     * @returns {this} Returns same object for fluent interface
+     */
+    'delay': function (delay) {
+      _delay = delay;
+      return this;
+    },
+    /**
+     * Trigger/setter function for fileChanged function
+     * @param {Function} [fileChangedFn] New file changed funciton. If not specified, the current function will be triggered.
+     * @returns {this} Returns same object for fluent interface
+     */
+    'fileChanged': function (fileChangedFn) {
+      if( arguments.length > 0 ) {
+        _fileChangedFn = fileChangedFn;
+      } else {
+        _fileChangedFn();
+      }
+      return this;
+    },
+    /**
+     * Remove first occurence file from watcher. DOES NOT REMOVE ITEM FROM CACHE NOR FILES CURRENTLY BEING REQUESTED
+     * @param {String} url Url of file to stop watching
+     * @returns {this} Returns same object for fluent interface
+     */
+    'remove': function (url) {
+      var urlIndex = -1;
+      // If we have the .indexOf method on arrays, use it
+      if( watchFiles.indexOf ) {
+        urlIndex = watchFiles.indexOf(url);
+      } else {
+      // Otherwise, do a linear search
+        var i = watchFiles.length;
+        while( i-- ) {
+          if( watchFiles[i] === url ) {
+            urlIndex = i;
+            break;
+          }
+        }
+      }
+      
+      // If the file has been found, remove it
+      if( urlIndex !== -1 ) {
+        watchFiles.splice(urlIndex, 1);
+      }
+      return this;
+    },
+    /**
+     * Remove all files from watcher. DOES NOT REMOVE FILES CURRENTLY BEING REQUESTED
+     * @returns {this} Returns same object for fluent interface
+     */
+    'removeAll': function () {
+      watchFiles = [];
+      return this;
+    },
+    /**
+     * Clear cache of original text from each file
+     * @returns {this} Returns same object for fluent interface
+     */
+    'clearCache': function () {
+      cache = {};
+      return this;
+    },
+    /**
+     * Sugar method for removing all files and resetting cache
+     * @returns {this} Returns same object for fluent interface
+     */
+    'reset': function () {
+      this.removeAll();
+      this.clearCache();
+      return this;
     }
-    // TODO: Stop fn
-    // TODO: Setttings fns
-    // TODO: Remove item fn
-    // TODO: Remove all fn
-    // TODO: Clear cache fn (overwrite with {})
   };
 }
 
 return FileWatcher;
-}());
+}())
+));
