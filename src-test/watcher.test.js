@@ -62,7 +62,7 @@ AsyncTestCase('FileWatcherTest', {
           assertMatch('makes an asynchronous request to the proper file', /hello\.html$/, xhr.url);
 
           // Set up the watcher to change the timestamp when a change occurs
-          watcher.fileChanged(function () {
+          watcher.addListener(function () {
             window.fileWatchTimestamp = +new Date();
           });
 

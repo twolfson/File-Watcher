@@ -59,12 +59,12 @@ var XHR = (function () {
 function FileWatcher() {
   this._files = [];
   this._cache = {};
+  this._listeners = [];
 }
 var arrPush = [].push;
 FileWatcher.prototype = {
   // Default properties
   '_delay': 1000,
-  '_onchange': noop,
   /**
    * Add a new item to the end of the list
    * @param {String|String[]} url URL or array of URLs to add to watch list
@@ -102,7 +102,8 @@ FileWatcher.prototype = {
     }
 
     var cache = this._cache,
-        req = XHR();
+        req = XHR(),
+        that = this;
 
     // Set up the XHR as async
     req.open("GET", url, true);
@@ -126,8 +127,16 @@ FileWatcher.prototype = {
           // Otherwise...
             // If the content has changed
             if (origText !== resText) {
-              // Call the main _onchange event and overwrite the cache
-              _onchange(origText, resText);
+              // Call each event listener (in the original context)
+              var listeners = that._listeners,
+                  i = 0,
+                  len = listeners.length;
+
+              for (; i < len; i++) {
+                listeners[i].call(that, origText, resText);
+              }
+
+              // Overwrite the cache
               cache[url] = resText;
             }
           }
@@ -190,16 +199,12 @@ FileWatcher.prototype = {
     return this;
   },
   /**
-   * Trigger/setter function for fileChanged function
-   * @param {Function} [fileChangedFn] New file changed funciton. If not specified, the current function will be triggered.
+   * Add a listener for when a change occurs
+   * @param {Function} Function to run when a change occurs
    * @returns {this} Returns same object for fluent interface
    */
-  'fileChanged': function (fileChangedFn) {
-    if( arguments.length > 0 ) {
-      _onchange = fileChangedFn;
-    } else {
-      _onchange();
-    }
+  'addListener': function (fn) {
+    this._listeners.push(fn);
     return this;
   },
   /**
