@@ -76,17 +76,10 @@ function FileWatcher() {
      * @param {String|String[]} url URL or array of URLs to add to watch list
      * @returns {this} Returns same object for fluent interface
      */
-    'append': function (url) {
+    'add': function (url) {
       // Concatenate to the current list of files
       watchFiles.push.apply(watchFiles, [].concat(url));
       return this;
-    },
-    /**
-     * Sugar method for append; same functionality
-     * @see FileWatcher.append
-     */
-    'add': function (url) {
-      return this.append(url);
     },
     /**
      * Sugar method for adding items and starting watcher
@@ -94,7 +87,7 @@ function FileWatcher() {
      * @returns {this} Returns same object for fluent interface
      */
     'watch': function (url) {
-      this.append(url);
+      this.add(url);
       this.start();
       return this;
     },
@@ -109,7 +102,7 @@ function FileWatcher() {
           url = watchFiles.shift();
 
       // If there is no 'next' item, return early
-      if( !url ) {
+      if (!url) {
         return this;
       }
 
@@ -118,7 +111,6 @@ function FileWatcher() {
 
       // Retrieve the files content
       req.onreadystatechange = function () {
-
         // Once the file has been completely retrieved
         if( req.readyState === 4 ) {
           // Add the file to the queue
