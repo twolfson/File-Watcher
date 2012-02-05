@@ -133,7 +133,7 @@ FileWatcher.prototype = {
                   len = listeners.length;
 
               for (; i < len; i++) {
-                listeners[i].call(that, origText, resText);
+                listeners[i].call(that, url, origText, resText);
               }
 
               // Overwrite the cache
