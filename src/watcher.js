@@ -166,12 +166,14 @@ FileWatcher.prototype = {
 
     // Set up async loop
     function asyncCallback() {
-      that.next(that.loopCallback);
+      that.next(function () {
+        that.loopCallback();
+      });
     }
 
     // Set up privitized variable for stopping
     that.loopCallback = function () {
-      setTimeout( asyncCallback, that._delay );
+      setTimeout(asyncCallback, that._delay);
     };
 
     // Fallback concurrent count to 1

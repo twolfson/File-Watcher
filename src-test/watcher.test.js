@@ -1,4 +1,7 @@
 function noop() {}
+function additionalRequestFn() {
+  fail('An additional request was made when it should not have been');
+}
 
 AsyncTestCase('FileWatcherTest', {
   'setUp': function () {
@@ -13,25 +16,52 @@ AsyncTestCase('FileWatcherTest', {
       xhr.onSend = that.sendFn;
     }
   },
-  'test A new FileWatcher can add, start, and stop monitoring a file': function () {
+  'test A new FileWatcher can add, start, and stop monitoring a file': function (queue) {
     // A new File Watcher
     var watcher = new FileWatcher();
     assertObject('is a type of object', watcher);
-    
+
     // that tracks a single file
     watcher.add('singleFile.html');
-    
-    // when it begins monitoring
-    watcher.start();
-    
-    // it makes requests for the appropriate file
-      // TODO: Check singleFile.html
-    
-      // and when it is stopped
-            watcher.stop();
-      // makes no additional requests
-        // TODO: Set up to fail
-        // TODO: Set 2s timeout to stop failing and pass
+
+    var that = this;
+    queue.call(function (callbacks) {
+      // when it begins monitoring
+      setTimeout(function () {
+        watcher.start();
+      }, 1);
+
+      that.sendFn = callbacks.add(function (xhr) {
+        that.sendFn = callbacks.addErrback(additionalRequestFn);
+
+        assertObject(xhr);
+        assertMatch('requests the appropriate file', /singleFile\.html$/, xhr.url);
+
+        // and when given a good response
+        setTimeout(function () {
+          xhr.respond(200, { "Content-Type": "text/plain" }, 'abcd');
+        }, 1);
+
+        // the content is requested a second time
+        that.sendFn = callbacks.add(function (xhr) {
+          that.sendFn = callbacks.addErrback(additionalRequestFn);
+
+          assertObject(xhr);
+          assertMatch('requests the appropriate file', /singleFile\.html$/, xhr.url);
+
+          // and when it is stopped
+          watcher.stop();
+
+          // and when given a good response
+          xhr.respond(200, { "Content-Type": "text/plain" }, 'abcd');
+
+          // makes no additional requests
+          setTimeout(callbacks.add(function () {
+            xhr.sendFn = noop;
+          }), 2000);
+        });
+      });
+    });
   },
   'test A FileWatcher can start and stop "watch"ing a file' : function () {
     // {
@@ -43,7 +73,7 @@ AsyncTestCase('FileWatcherTest', {
       // 'automatically monitors': function () {},
       // 'and when stopped': {
         // 'makes no further requests': function () {
-        
+
         // }
       // }
     // }
@@ -56,7 +86,7 @@ AsyncTestCase('FileWatcherTest', {
     // 'can watch an array of files': {
       // 'and when stopped': {
         // 'makes no further requests': function () {
-        
+
         // }
       // }
     // }
@@ -69,69 +99,65 @@ AsyncTestCase('FileWatcherTest', {
     // 'watching a single file': {
       // 'with an event listener': {
         // 'is triggered when there is a file change': {
-        
+
         // }
       // }
     // }
   // }
 // }
   },
-  // Below should be broken down into .watch and .addListener
   // TODO: Test concurrency count
   // TODO: Test step/next?
   // TODO: Write out tests in BDD format and export as selenium ready test (but make it a modular wrapper layer)
   'test FileWatcher.watch(singleFile)': function (queue) {
-    // A new File Watcher
-    var watcher = new FileWatcher(),
-        that = this,
-        timestamp = +new Date();
+    // // A new File Watcher
+    // var watcher = new FileWatcher(),
+        // that = this,
+        // timestamp = +new Date();
 
-    // set a window variable for later
-    window.fileWatchTimestamp = timestamp;
+    // // set a window variable for later
+    // window.fileWatchTimestamp = timestamp;
 
-    // Create an async callback queue
-    queue.call(function (callbacks) {
-      // Begin watching a single file (after everytihng below is set up)
-      setTimeout(function () {
-        watcher.watch('hello.html');
-      }, 1);
+    // // Create an async callback queue
+    // queue.call(function (callbacks) {
+      // // Begin watching a single file (after everytihng below is set up)
+      // setTimeout(function () {
+        // watcher.watch('hello.html');
+      // }, 1);
 
-      // When hello.html is first requested
-      that.sendFn = callbacks.add(function (xhr) {
-        // we prevent further hello.html requests from coming through
-        that.sendFn = noop;
+      // // When hello.html is first requested
+      // that.sendFn = callbacks.add(function (xhr) {
+        // // we prevent further hello.html requests from coming through
+        // that.sendFn = noop;
 
-        // then assert that this is in fact an xhr and is requesting the proper url
-        assertObject('makes an asynchronous request', xhr);
-        assertMatch('makes an asynchronous request to the proper file', /hello\.html$/, xhr.url);
+        // // then assert that this is in fact an xhr and is requesting the proper url
+        // assertObject('makes an asynchronous request', xhr);
+        // assertMatch('makes an asynchronous request to the proper file', /hello\.html$/, xhr.url);
 
-        // then, we respond with some data (after the following is set up)
-        setTimeout(function () {
-          xhr.respond(200, { "Content-Type": "text/plain" }, 'abcd');
-        }, 1);
+        // // then, we respond with some data (after the following is set up)
+        // setTimeout(function () {
+          // xhr.respond(200, { "Content-Type": "text/plain" }, 'abcd');
+        // }, 1);
 
-        // When hello.html is requested a second time
-        that.sendFn = callbacks.add(function (xhr) {
-          // make sure that xhr is an object and the proper url is being requested
-          assertObject('makes an asynchronous request', xhr);
-          assertMatch('makes an asynchronous request to the proper file', /hello\.html$/, xhr.url);
+        // // When hello.html is requested a second time
+        // that.sendFn = callbacks.add(function (xhr) {
+          // // make sure that xhr is an object and the proper url is being requested
+          // assertObject('makes an asynchronous request', xhr);
+          // assertMatch('makes an asynchronous request to the proper file', /hello\.html$/, xhr.url);
 
-          // Set up the watcher to change the timestamp when a change occurs
-          watcher.addListener(function () {
-            window.fileWatchTimestamp = +new Date();
-          });
+          // // Set up the watcher to change the timestamp when a change occurs
+          // watcher.addListener(function () {
+            // window.fileWatchTimestamp = +new Date();
+          // });
 
-          // then, we respond with a different response than the one from before (thus triggering the fileChanged function)
-          xhr.respond(200, { "Content-Type": "text/plain" }, '1234');
+          // // then, we respond with a different response than the one from before (thus triggering the fileChanged function)
+          // xhr.respond(200, { "Content-Type": "text/plain" }, '1234');
 
-          // finally, we make sure that the fileChanged event was triggered
-          assertNotSame(timestamp, window.fileWatchTimestamp);
-        });
-      });
-    });
-  },
-  'test FileWatcher.watch(fileArray)': function (queue) {
-
+          // // finally, we make sure that the fileChanged event was triggered
+          // assertNotSame(timestamp, window.fileWatchTimestamp);
+        // });
+      // });
+    // });
   },
   'tearDown': function () {
     this.fakeXhr.restore();
