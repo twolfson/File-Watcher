@@ -63,35 +63,111 @@ AsyncTestCase('FileWatcherTest', {
       });
     });
   },
-  'test A FileWatcher can start and stop "watch"ing a file' : function () {
-    // {
-  // 'A FileWatcher' {
-    // topic: function () {
-      // return new FileWatcher();
-    // },
-    // 'that watches a single file': {
-      // 'automatically monitors': function () {},
-      // 'and when stopped': {
-        // 'makes no further requests': function () {
+  'test A FileWatcher can start and stop "watch"ing a file' : function (queue) {
+    var watcher = new FileWatcher();
 
-        // }
-      // }
-    // }
-  // }
-// },
+    // that watches a single file
+    setTimeout(function () {
+      watcher.watch('singleWatchFile.html');
+    }, 1);
+
+    // automatically monitors
+    var that = this;
+    queue.call(function (callbacks) {
+      that.sendFn = callbacks.add(function (xhr) {
+        that.sendFn = callbacks.addErrback(additionalRequestFn);
+
+        assertObject(xhr);
+        assertMatch('requests the appropriate file', /singleWatchFile\.html$/, xhr.url);
+
+        // and when given a good response
+        setTimeout(function () {
+          xhr.respond(200, { "Content-Type": "text/plain" }, 'abcd');
+        }, 1);
+
+        // the content is requested a second time
+        that.sendFn = callbacks.add(function (xhr) {
+          that.sendFn = callbacks.addErrback(additionalRequestFn);
+
+          assertObject(xhr);
+          assertMatch('requests the appropriate file', /singleWatchFile\.html$/, xhr.url);
+
+          // and when it is stopped
+          watcher.stop();
+
+          // and when given a good response
+          xhr.respond(200, { "Content-Type": "text/plain" }, 'abcd');
+
+          // makes no additional requests
+          setTimeout(callbacks.add(function () {
+            xhr.sendFn = noop;
+          }), 2000);
+        });
+      });
+    });
   },
-  'test A FileWatcher can start and stop "watch"ing an array of files': function () {
-  // {
-  // 'A FileWatcher': {
-    // 'can watch an array of files': {
-      // 'and when stopped': {
-        // 'makes no further requests': function () {
+  'test A FileWatcher can start and stop "watch"ing an array of files': function (queue) {
+    var watcher = new FileWatcher();
 
-        // }
-      // }
-    // }
-  // }
-// },
+    // that watches a multiple files
+    setTimeout(function () {
+      watcher.watch(['multiFile1.html', 'multiFile2.html', 'multiFile3.html']);
+    }, 1);
+
+    // automatically monitors
+    var that = this;
+    queue.call(function (callbacks) {
+      that.sendFn = callbacks.add(function (xhr) {
+        assertObject(xhr);
+        assertMatch('requests one the appropriate file', /multiFile1\.html$/, xhr.url);
+
+        // and when given a good response
+        setTimeout(function () {
+          xhr.respond(200, { "Content-Type": "text/plain" }, 'abcd');
+        }, 1);
+
+        // the next request is made
+        that.sendFn = callbacks.add(function (xhr) {
+          that.sendFn = callbacks.addErrback(additionalRequestFn);
+
+          assertObject(xhr);
+          assertMatch('requests the appropriate file', /multiFile2\.html$/, xhr.url);
+
+          // and when given a good response
+          xhr.respond(200, { "Content-Type": "text/plain" }, 'abcd');
+          
+          // the next request is made
+          that.sendFn = callbacks.add(function (xhr) {
+            that.sendFn = callbacks.addErrback(additionalRequestFn);
+
+            assertObject(xhr);
+            assertMatch('requests the appropriate file', /multiFile3\.html$/, xhr.url);
+
+            // and when given a good response
+            xhr.respond(200, { "Content-Type": "text/plain" }, 'abcd');
+            
+            // the next request is made
+            that.sendFn = callbacks.add(function (xhr) {
+              that.sendFn = callbacks.addErrback(additionalRequestFn);
+
+              assertObject(xhr);
+              assertMatch('requests the appropriate file', /multiFile1\.html$/, xhr.url);
+              
+              // when stopped
+              watcher.stop();
+
+              // and when given a good response
+              xhr.respond(200, { "Content-Type": "text/plain" }, 'abcd');
+
+              // makes no additional requests
+              setTimeout(callbacks.add(function () {
+                xhr.sendFn = noop;
+              }), 2000);
+            });
+          });
+        });
+      });
+    });
   },
   'test A FileWatcher "watch"ing a single file with an event listener': function () {
   // {

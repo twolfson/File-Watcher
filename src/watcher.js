@@ -167,6 +167,7 @@ FileWatcher.prototype = {
     // Set up async loop
     function asyncCallback() {
       that.next(function () {
+        // Retrieve and call late-binding loopCallback
         that.loopCallback();
       });
     }
