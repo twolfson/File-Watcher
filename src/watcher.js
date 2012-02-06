@@ -79,11 +79,12 @@ FileWatcher.prototype = {
   /**
    * Sugar method for adding items and starting watcher
    * @param {String|String[]} url URL or array of URLs to watch
+   * @param {Number} [concurrencyCount] Amount of files to watch at the same time
    * @returns {this} Returns same object for fluent interface
    */
-  'watch': function (url) {
+  'watch': function (url, concurrencyCount) {
     this.add(url);
-    this.start();
+    this.start(concurrencyCount);
     return this;
   },
   /**
@@ -156,10 +157,10 @@ FileWatcher.prototype = {
   },
   /**
    * Start method for watcher to begin checking files (circular queue)
-   * @param {Number} [concurrentCount] Amount of items to check concurrently
+   * @param {Number} [concurrencyCount] Amount of items to check concurrently
    * @returns {this} Returns same object for fluent interface
    */
-  'start': function (concurrentCount) {
+  'start': function (concurrencyCount) {
     var that = this,
         i;
 
@@ -174,9 +175,9 @@ FileWatcher.prototype = {
     };
 
     // Fallback concurrent count to 1
-    concurrentCount = concurrentCount || 1;
+    concurrencyCount = concurrencyCount || 1;
     // Start the concurrent loops
-    for (i = 0; i < concurrentCount; i++) {
+    for (i = 0; i < concurrencyCount; i++) {
       asyncCallback();
     }
     return this;

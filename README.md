@@ -1,6 +1,20 @@
 Synopsis
 ========
-Fires XHRs to the watched files. When any change happens to any attached file, the user defined listeners will be triggered.
+Currently, there is no cross-platform solution that allows a front-end developer to alter some code (flavor agnostic) and immediately see the result occur in the browser.
+
+This is a poor man's solution to solving that problem half way. The code base has been split up into two halves; a script that watches specific URL's for any content changes and another script which gathers the resources used on the page.
+
+This script is the first half.
+
+How It Works
+============
+FileWatcher is a constructor function that keeps a in-object cache of the contents of files. When a file is added to the watcher, it is pushed into a queue.
+
+When a watcher is started, it takes the first item from the queue and fires an XHR or one of its cousins (cross-browser down to IE5.5) to fetch the content of a resource.
+
+If the content has never been seen before, it is added to our cache. If there is a change, trigger the listeners.
+
+Next, the file is added back to the queue to be watched. Then, one second later (or whatever the delay is) the next item is pulled from the queue and the process begins again.
 
 Usage
 ========
@@ -35,5 +49,7 @@ The API
  - **watch**(url | [url */\*, url, ...\*/*]) - Runs 'add' method then 'start' method acting as a nice layer of sugar.
 
  - **addListener**(eventFn) - Adds a function to execute when there is a change to one of the files. The eventFn receives three parameters, the file name, its old contents, and its new contents.
+
+ - **delay**(msWait) - Sets the time to wait between XHR calls. This is 1000ms by default.
 
 Enjoy!

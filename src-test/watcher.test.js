@@ -1,11 +1,4 @@
-function noop(){}
-
-function reverseCall() {
-  var i = arguments.length;
-  while( i-- ) {
-    arguments[i]();
-  }
-}
+function noop() {}
 
 AsyncTestCase('FileWatcherTest', {
   'setUp': function () {
@@ -25,6 +18,22 @@ AsyncTestCase('FileWatcherTest', {
     var watcher = new FileWatcher();
     assertObject('is a type of object', watcher);
   },
+  'test A new FileWatcher can add and monitor files': /*FileWatcher.add, .start and .stop':*/ function (queue) {
+    // TODO: If there are any requests, fail immediately
+    // TODO: Add a file to the queue
+    // TODO: Set up simple XHR responder
+    // TODO: Fire .start
+    // TODO: Wait for one response
+    // TODO: Trigger .stop
+    // TODO: Fail if there are any requests
+  },
+  'test FileWatcher.watch and .stop' : function () {
+    // TODO: Same test as before
+  },
+  // Below should be broken down into .watch and .addListener
+  // TODO: Test concurrency count
+  // TODO: Test step/next?
+  // TODO: Write out tests in BDD format and export as selenium ready test (but make it a modular wrapper layer)
   'test FileWatcher.watch(singleFile)': function (queue) {
     // A new File Watcher
     var watcher = new FileWatcher(),
