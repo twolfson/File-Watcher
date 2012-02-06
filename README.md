@@ -36,13 +36,18 @@ Develop with a hands-free refresh
 =================================
 FileWatcher was initially built with a sister script called ResourceCollector. Currently, it is under a refactoring but when completed you will be able to refresh the page dynamically whenever there is an HTML change and seamlessly update images and CSS.
 
+Tested in
+=========
+ - Firefox 10
+ - IE 6
 
 The API
 =========
  - **start**([concurrencyCount=1]) - Begins looping through the queue of files. If there is a concurrencyCount specified, that many XHR's will be running at the same time.
 
  - **stop**() - Terminates any further XHR's from being requested. The current FileWatcher does not support ignoring already started requests.
- - next() - Fire an XHR for the next file in the queue
+
+ - **next**() - Fire an XHR for the next file in the queue
 
  - **add**(url | [url */\*, url, ...\*/*]) - Add either a URL string or array of URLs to the queue of files to watch
 
