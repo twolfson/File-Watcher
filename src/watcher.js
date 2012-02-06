@@ -1,10 +1,7 @@
-// TODO: Test in IE6
 // AMD inspired by domready
 (function (name, definition) {
-  var defObj;
   if (typeof define === 'function') {
-    defObj[name] = definition;
-    define(defObj);
+    define(definition);
   } else if (typeof exports !== 'undefined') {
     exports[name] = definition;
   } else {

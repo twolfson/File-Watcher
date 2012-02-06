@@ -26,19 +26,57 @@ To watch your own set of files, download and include the FileWatcher script on y
 
 Then, create your new FileWatcher object, set up what you would like it to do when a file changes, and start watching your items.
 
-        var watcher = new FileWatcher();
-        watcher.addListener(function () {
-            location.reload(); // Reload when a file changes
-        });
-        watcher.watch('index.css');
+    var watcher = new FileWatcher();
+    watcher.addListener(function () {
+        location.reload(); // Reload when a file changes
+    });
+    watcher.watch('index.css');
 
 Develop with a hands-free refresh
 =================================
-FileWatcher was initially built with a sister script called ResourceCollector. Currently, it is under a refactoring but when completed you will be able to refresh the page dynamically whenever there is an HTML change and seamlessly update images and CSS.
+FileWatcher was initially built with a sister script called ResourceCollector. When these scripts are used together, they allow for webpages to dynamically refresh whenever there is an HTML change and seamlessly update images and CSS.
+
+Below are two common examples of how to use the scripts.
+
+Refresh always
+--------------
+This snippet will make the entire webpage reload on any resource change (HTML, CSS, script, or image). Place this snippet at the bottom of the body of your HTML page since collector will not find all the resources otherwise.
+
+    <script src="//raw.github.com/twolfson/File-Watcher/master/src/watcher.js"></script>
+    <script src="//raw.github.com/twolfson/Resource-Collector/master/src/collector.js"></script>
+    <script>
+        (function () {
+           var watcher = new FileWatcher(),
+               resources = ResourceCollector.collect();
+           watcher.addListener(function () {
+             location.reload();
+           });
+           watcher.watch(resources);
+        }());
+    </script>
+
+Smart refresh
+-------------
+This snippet will reload when there is an HTML or script change. Additionally, we will watch CSS and images for changes (which when the browser sees a change has occurred, will update without a refresh).
+
+    <script src="//raw.github.com/twolfson/File-Watcher/master/src/watcher.js"></script>
+    <script src="//raw.github.com/twolfson/Resource-Collector/master/src/collector.js"></script>
+    <script>
+        (function () {
+           var watcher = new FileWatcher(),
+               resources = ResourceCollector.collect();
+           watcher.addListener(function (url) {
+             if (url.match(/(js|html)$/)) {
+               location.reload();
+             }
+           });
+           watcher.watch(resources);
+        }());
+    </script>
 
 Tested in
 =========
- - Firefox 10
+ - Firefox 7
  - IE 6
 
 The API
@@ -49,9 +87,9 @@ The API
 
  - **next**() - Fire an XHR for the next file in the queue
 
- - **add**(url | [url */\*, url, ...\*/*]) - Add either a URL string or array of URLs to the queue of files to watch
+ - **add**(url | url[]) - Add either a URL string or array of URLs to the queue of files to watch
 
- - **watch**(url | [url */\*, url, ...\*/*]) - Runs 'add' method then 'start' method acting as a nice layer of sugar.
+ - **watch**(url | url[]) - Runs 'add' method then 'start' method acting as a nice layer of sugar.
 
  - **addListener**(eventFn) - Adds a function to execute when there is a change to one of the files. The eventFn receives three parameters, the file name, its old contents, and its new contents.
 
