@@ -13,22 +13,68 @@ AsyncTestCase('FileWatcherTest', {
       xhr.onSend = that.sendFn;
     }
   },
-  'test A new FileWatcher': function () {
+  'test A new FileWatcher can add, start, and stop monitoring a file': function () {
     // A new File Watcher
     var watcher = new FileWatcher();
     assertObject('is a type of object', watcher);
+    
+    // that tracks a single file
+    watcher.add('singleFile.html');
+    
+    // when it begins monitoring
+    watcher.start();
+    
+    // it makes requests for the appropriate file
+      // TODO: Check singleFile.html
+    
+      // and when it is stopped
+            watcher.stop();
+      // makes no additional requests
+        // TODO: Set up to fail
+        // TODO: Set 2s timeout to stop failing and pass
   },
-  'test A new FileWatcher can add and monitor files': /*FileWatcher.add, .start and .stop':*/ function (queue) {
-    // TODO: If there are any requests, fail immediately
-    // TODO: Add a file to the queue
-    // TODO: Set up simple XHR responder
-    // TODO: Fire .start
-    // TODO: Wait for one response
-    // TODO: Trigger .stop
-    // TODO: Fail if there are any requests
+  'test A FileWatcher can start and stop "watch"ing a file' : function () {
+    // {
+  // 'A FileWatcher' {
+    // topic: function () {
+      // return new FileWatcher();
+    // },
+    // 'that watches a single file': {
+      // 'automatically monitors': function () {},
+      // 'and when stopped': {
+        // 'makes no further requests': function () {
+        
+        // }
+      // }
+    // }
+  // }
+// },
   },
-  'test FileWatcher.watch and .stop' : function () {
-    // TODO: Same test as before
+  'test A FileWatcher can start and stop "watch"ing an array of files': function () {
+  // {
+  // 'A FileWatcher': {
+    // 'can watch an array of files': {
+      // 'and when stopped': {
+        // 'makes no further requests': function () {
+        
+        // }
+      // }
+    // }
+  // }
+// },
+  },
+  'test A FileWatcher "watch"ing a single file with an event listener': function () {
+  // {
+  // 'A FileWatcher': {
+    // 'watching a single file': {
+      // 'with an event listener': {
+        // 'is triggered when there is a file change': {
+        
+        // }
+      // }
+    // }
+  // }
+// }
   },
   // Below should be broken down into .watch and .addListener
   // TODO: Test concurrency count

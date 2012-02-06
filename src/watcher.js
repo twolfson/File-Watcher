@@ -187,7 +187,7 @@ FileWatcher.prototype = {
    * @returns {this} Returns same object for fluent interface
    */
   'stop': function () {
-    that.loopCallback = noop;
+    this.loopCallback = noop;
     return this;
   },
   /**
