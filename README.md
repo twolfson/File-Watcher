@@ -16,22 +16,6 @@ If the content has never been seen before, it is added to our cache. If there is
 
 Next, the file is added back to the queue to be watched. Then, one second later (or whatever the delay is) the next item is pulled from the queue and the process begins again.
 
-Usage
-========
-To watch your own set of files, download and include the FileWatcher script on your page (either via &lt;script&gt; or an AMD loader).
-
-    <script src="//raw.github.com/twolfson/File-Watcher/master/src/watcher.js"></script>
-    OR
-    require(['FileWatcher'], function (FileWatcher) { /* Your code goes here */ });
-
-Then, create your new FileWatcher object, set up what you would like it to do when a file changes, and start watching your items.
-
-    var watcher = new FileWatcher();
-    watcher.addListener(function () {
-        location.reload(); // Reload when a file changes
-    });
-    watcher.watch('index.css');
-
 Develop with a hands-free refresh
 =================================
 FileWatcher was initially built with a sister script called ResourceCollector. When these scripts are used together, they allow for webpages to dynamically refresh whenever there is an HTML change and seamlessly update images and CSS.
@@ -73,6 +57,22 @@ This snippet will reload when there is an HTML or script change. Additionally, w
            watcher.watch(resources);
         }());
     </script>
+
+Standalone Usage
+========
+To watch your own set of files, download and include the FileWatcher script on your page (either via &lt;script&gt; or an AMD loader).
+
+    <script src="//raw.github.com/twolfson/File-Watcher/master/src/watcher.js"></script>
+    OR
+    require(['FileWatcher'], function (FileWatcher) { /* Your code goes here */ });
+
+Then, create your new FileWatcher object, set up what you would like it to do when a file changes, and start watching your items.
+
+    var watcher = new FileWatcher();
+    watcher.addListener(function () {
+        location.reload(); // Reload when a file changes
+    });
+    watcher.watch('index.css');
 
 Tested in
 =========
