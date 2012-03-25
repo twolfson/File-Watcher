@@ -26,8 +26,8 @@ Refresh always
 --------------
 This snippet will make the entire webpage reload on any resource change (HTML, CSS, script, or image). Place this snippet at the bottom of the body of your HTML page since collector will not find all the resources otherwise.
 
-    <script src="//raw.github.com/twolfson/File-Watcher/master/src/watcher.js"></script>
-    <script src="//raw.github.com/twolfson/Resource-Collector/master/src/collector.js"></script>
+    <script src="https://raw.github.com/twolfson/File-Watcher/master/src/watcher.js"></script>
+    <script src="https://raw.github.com/twolfson/Resource-Collector/master/src/collector.js"></script>
     <script>
         (function () {
            var watcher = new FileWatcher(),
@@ -43,8 +43,8 @@ Smart refresh
 -------------
 This snippet will reload when there is an HTML or script change. Additionally, we will watch CSS and images for changes (which when the browser sees a change has occurred, will update without a refresh).
 
-    <script src="//raw.github.com/twolfson/File-Watcher/master/src/watcher.js"></script>
-    <script src="//raw.github.com/twolfson/Resource-Collector/master/src/collector.js"></script>
+    <script src="https://raw.github.com/twolfson/File-Watcher/master/src/watcher.js"></script>
+    <script src="https://raw.github.com/twolfson/Resource-Collector/master/src/collector.js"></script>
     <script>
         (function () {
            var watcher = new FileWatcher(),
@@ -62,7 +62,7 @@ Standalone Usage
 ========
 To watch your own set of files, download and include the FileWatcher script on your page (either via &lt;script&gt; or an AMD loader).
 
-    <script src="//raw.github.com/twolfson/File-Watcher/master/src/watcher.js"></script>
+    <script src="https://raw.github.com/twolfson/File-Watcher/master/src/watcher.js"></script>
     OR
     require(['FileWatcher'], function (FileWatcher) { /* Your code goes here */ });
 
