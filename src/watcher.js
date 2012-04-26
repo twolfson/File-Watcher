@@ -1,7 +1,9 @@
 // AMD inspired by domready
 (function (name, definition) {
   if (typeof define === 'function') {
-    define(definition);
+    define(function () {
+      return definition;
+    });
   } else if (typeof exports !== 'undefined') {
     exports[name] = definition;
   } else {
