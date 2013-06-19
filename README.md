@@ -1,4 +1,4 @@
-Synopsis
+Synopsis [![Donate on Gittip](http://badgr.co/gittip/twolfson.png)](https://www.gittip.com/twolfson/)
 ========
 Currently, there is no cross-platform solution that allows a front-end developer to alter some code (flavor agnostic) and immediately see the result occur in the browser.
 
